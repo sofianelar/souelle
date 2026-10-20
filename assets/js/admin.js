@@ -19,28 +19,95 @@ function checkAdminAuth() {
   }
 }
 
-function verifyAdminPin(e) {
-  if (e) e.preventDefault();
-  const pinInput = document.getElementById("adminPinInput");
-  const pin = pinInput ? pinInput.value.trim() : "";
-  const settings = db.getSettings();
-  const correctPin = settings.adminPin || "souelle2025";
+// Hardcoded admin credentials (email + password)
+const ADMIN_EMAIL    = "souadayaosmani@gmail.com";
+const ADMIN_PASSWORD = "souados2007";
 
-  if (pin === correctPin || pin === "souelle2025" || pin === "admin123") {
+function verifyAdminLogin(e) {
+  if (e) e.preventDefault();
+
+  const emailInput    = document.getElementById("adminEmailInput");
+  const passwordInput = document.getElementById("adminPasswordInput");
+  const errorBox      = document.getElementById("adminLoginError");
+
+  const email    = emailInput    ? emailInput.value.trim().toLowerCase()    : "";
+  const password = passwordInput ? passwordInput.value : "";
+
+  const emailOk    = (email    === ADMIN_EMAIL);
+  const passwordOk = (password === ADMIN_PASSWORD);
+
+  if (emailOk && passwordOk) {
+    // Success
+    if (errorBox) errorBox.style.display = "none";
     sessionStorage.setItem("souelle_admin_logged_in", "true");
     const authModal = document.getElementById("adminAuthModal");
     if (authModal) authModal.classList.remove("active");
     initAdminDashboard();
     showToast("مرحباً بكِ في لوحة تحكم Souelle Pajamas 🎀", "success");
   } else {
-    showToast("رمز المرور غير صحيح! الرمز الافتراضي: souelle2025", "error");
+    // Shake the form and show error
+    if (errorBox) {
+      errorBox.style.display = "block";
+    }
+    // Shake animation
+    const form = document.getElementById("adminLoginForm");
+    if (form) {
+      form.style.animation = "none";
+      form.offsetHeight; // reflow
+      form.style.animation = "shake 0.4s ease";
+    }
+    // Clear password field only on wrong attempt
+    if (passwordInput) passwordInput.value = "";
+    if (passwordInput) passwordInput.focus();
   }
 }
 
+// Keep old name as alias so any stray calls don't break
+function verifyAdminPin(e) { verifyAdminLogin(e); }
+
 function adminLogout() {
-  sessionStorage.removeItem("souelle_admin_logged_in");
-  window.location.reload();
+  if (confirm("هل تريدين الخروج من لوحة الإدارة والعودة إلى المتجر؟")) {
+    sessionStorage.removeItem("souelle_admin_logged_in");
+    window.location.href = "index.html";
+  }
 }
+
+// Global modal closer & toast helpers for admin
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove("active");
+  }
+}
+
+function showToast(message, type = "info") {
+  let container = document.getElementById("toastContainer");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : '🎀'}</span> <span>${message}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-20px)";
+    toast.style.transition = "all 0.3s ease";
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Close any open modal with Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    document.querySelectorAll(".modal-overlay.active").forEach(m => m.classList.remove("active"));
+  }
+});
 
 // ==================== DASHBOARD INITIALIZATION ====================
 async function initAdminDashboard() {
@@ -742,9 +809,8 @@ function loadAdminCategories() {
   const settings = db.getSettings();
   const categories = settings.categories || DEFAULT_CONFIG.categories;
 
-  tbody.innerHTML = categories.map((cat, idx) => `
+  tbody.innerHTML = categories.map((cat) => `
     <tr>
-      <td style="font-size: 1.5rem; text-align: center;">${cat.icon || '🎀'}</td>
       <td><strong>${cat.name}</strong></td>
       <td><code>${cat.id}</code></td>
       <td>
@@ -766,41 +832,43 @@ function loadAdminCategories() {
 }
 
 function openAddCategoryModal() {
-  document.getElementById("categoryEditIndex").value = "";
-  document.getElementById("categoryIconInput").value = "";
-  document.getElementById("categoryNameInput").value = "";
-  document.getElementById("categoryIdInput").value = "";
-  document.getElementById("categoryModal").classList.add("active");
+  const nameInput = document.getElementById("categoryNameInput");
+  if (nameInput) nameInput.value = "";
+  const editIndex = document.getElementById("categoryEditIndex");
+  if (editIndex) editIndex.value = "";
+  const modal = document.getElementById("categoryModal");
+  if (modal) modal.classList.add("active");
+  if (nameInput) setTimeout(() => nameInput.focus(), 100);
 }
 
 async function handleCategoryFormSubmit(e) {
   e.preventDefault();
-  const icon = document.getElementById("categoryIconInput").value.trim() || "🎀";
   const name = document.getElementById("categoryNameInput").value.trim();
-  const rawId = document.getElementById("categoryIdInput").value.trim();
-  const id = rawId.toLowerCase().replace(/[^a-z0-9_-]/g, "_");
 
-  if (!name || !id) {
-    showToast("يرجى إدخال اسم ورمز التصنيف", "error");
+  if (!name) {
+    showToast("يرجى إدخال اسم التصنيف", "error");
     return;
   }
 
   const settings = db.getSettings();
   const categories = settings.categories || [...DEFAULT_CONFIG.categories];
 
-  // Check if ID already exists
-  if (categories.some(c => c.id === id)) {
-    showToast("هذا الرمز مستخدم بالفعل لتصنيف آخر!", "error");
+  // Auto generate a unique id
+  const id = "cat_" + Date.now().toString(36);
+
+  // Check if name already exists
+  if (categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    showToast("هذا التصنيف موجود بالفعل!", "error");
     return;
   }
 
-  categories.push({ id, name, icon });
+  categories.push({ id, name });
   settings.categories = categories;
 
   await db.saveSettings(settings);
   closeModal("categoryModal");
   loadAdminCategories();
-  showToast(`تمت إضافة تصنيف "${name}" بنجاح! 🎀`, "success");
+  showToast(`تمت إضافة تصنيف "${name}" بنجاح! ✨`, "success");
 }
 
 async function deleteCategory(catId) {
@@ -1105,7 +1173,8 @@ async function deleteReview(revId) {
 }
 
 // Global expose
-window.verifyAdminPin = verifyAdminPin;
+window.verifyAdminLogin = verifyAdminLogin;
+window.verifyAdminPin   = verifyAdminPin;  // alias
 window.adminLogout = adminLogout;
 window.openAddProductModal = openAddProductModal;
 window.openEditProductModal = openEditProductModal;
