@@ -391,9 +391,42 @@
   }
 }
 
+@media (max-width: 576px) {
+  .stats-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .color-picker-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
+
 /* Shake Animation for incorrect login */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-8px); }
   40%, 80% { transform: translateX(8px); }
+}
+
+/* Hide Netlify Badge & Drawer in Admin */
+netlify-drawer,
+#netlify-drawer,
+.netlify-badge,
+[data-netlify-deploy-id],
+div[class*="netlify-"],
+div[id*="netlify-"],
+div[class*="netlifyBadge"],
+iframe[title*="Netlify"],
+iframe[src*="netlify"],
+[aria-label*="Netlify"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  z-index: -9999 !important;
 }

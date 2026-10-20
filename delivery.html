@@ -7,7 +7,7 @@
   <meta name="description" content="تعرفي على أسعار التوصيل لجميع ولايات الجزائر الـ 58، مدة التوصيل، وسياسة الدفع عند الاستلام مع إمكانية المعاينة قبل الدفع.">
   
   <link rel="icon" type="image/jpeg" href="assets/images/logo.jpg">
-  <link rel="stylesheet" href="assets/css/style.css?v=2.5">
+  <link rel="stylesheet" href="assets/css/style.css?v=3.0">
 </head>
 <body>
 
@@ -120,7 +120,7 @@
 
         <!-- Result Box -->
         <div id="calculatorResult" style="max-width: 600px; margin: 0 auto; display: none;">
-          <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; text-align: center;">
+          <div class="calculator-result-grid" style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; text-align: center;">
             <div style="background: #fff; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
               <span style="font-size: 1.8rem;">🏠</span>
               <h4 style="font-size: 1rem; color: var(--secondary); margin: 0.4rem 0;">توصيل لباب المنزل</h4>
@@ -211,9 +211,9 @@
     </div>
   </footer>
 
-  <script src="assets/js/wilayas.js?v=2.5"></script>
-  <script src="assets/js/config.js?v=2.5"></script>
-  <script src="assets/js/db.js?v=2.5"></script>
+  <script src="assets/js/wilayas.js?v=3.0"></script>
+  <script src="assets/js/config.js?v=3.0"></script>
+  <script src="assets/js/db.js?v=3.0"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const wilayas = db.getWilayas();

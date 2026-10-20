@@ -879,3 +879,21 @@ window.handleCartCheckoutSubmit = handleCartCheckoutSubmit;
 window.sendCartWhatsapp = sendCartWhatsapp;
 window.updateCartItemQty = updateCartItemQty;
 window.showToast = showToast;
+
+// Auto-remove Netlify Badge / Feedback Drawer
+function removeNetlifyBadge() {
+  try {
+    document.querySelectorAll('netlify-drawer, #netlify-drawer, .netlify-badge, [data-netlify-deploy-id], iframe[title*="Netlify"], iframe[src*="netlify"]').forEach(el => el.remove());
+    document.querySelectorAll('div, a, span, p, button, aside, section').forEach(el => {
+      if (el.textContent && el.textContent.includes('Powered by Netlify')) {
+        el.style.setProperty('display', 'none', 'important');
+        el.remove();
+      }
+    });
+  } catch (e) {
+    // Silent
+  }
+}
+window.addEventListener('DOMContentLoaded', removeNetlifyBadge);
+window.addEventListener('load', removeNetlifyBadge);
+setInterval(removeNetlifyBadge, 1000);

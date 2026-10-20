@@ -1315,7 +1315,34 @@ button {
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* ==================== RESPONSIVE DESIGN ==================== */
+/* ==================== HIDE NETLIFY BADGE & DRAWER ==================== */
+netlify-drawer,
+#netlify-drawer,
+.netlify-badge,
+[data-netlify-deploy-id],
+div[class*="netlify-"],
+div[id*="netlify-"],
+div[class*="netlifyBadge"],
+iframe[title*="Netlify"],
+iframe[src*="netlify"],
+[aria-label*="Netlify"],
+a[href*="netlify.com"][target="_blank"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
+
+/* ==================== RESPONSIVE DESIGN (MEDIA QUERIES) ==================== */
+
+/* 1. Large Tablets & Small Laptops (<= 1024px) */
 @media (max-width: 1024px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -1327,42 +1354,321 @@ button {
   }
   .hero-subtitle {
     margin: 0 auto;
+    max-width: 600px;
   }
   .hero-cta-group {
     justify-content: center;
   }
+  .hero-banner-box {
+    max-width: 580px;
+    margin: 0 auto;
+  }
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
   .footer-grid {
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
   }
 }
 
+/* 2. Tablets Portrait & Standard Mobile (<= 768px) */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* Topbar */
+  .topbar {
+    padding: 0.5rem 0;
+  }
+  .topbar .container {
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: center;
+  }
+  .topbar-msg {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  .topbar-contact {
+    font-size: 0.82rem;
+  }
+
+  /* Header & Navigation */
+  .header-main .container {
+    padding: 0.75rem 1rem;
+  }
+  .brand-logo-img {
+    width: 44px;
+    height: 44px;
+  }
+  .brand-title {
+    font-size: 1.28rem;
+  }
+  .brand-tagline {
+    font-size: 0.72rem;
+  }
   .nav-links {
     display: none;
   }
   .mobile-nav-toggle {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-btn-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.05rem;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 2rem 0 3rem;
   }
   .hero-title {
-    font-size: 2.15rem;
+    font-size: 2rem;
+    line-height: 1.25;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  .hero-cta-group .btn-primary,
+  .hero-cta-group .btn-whatsapp-hero {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.25rem;
+    font-size: 1rem;
+  }
+  .hero-banner-box {
+    max-height: 340px;
+  }
+
+  /* Features Strip */
+  .features-strip {
+    padding: 1rem 0 2.25rem;
   }
   .features-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
+  .feature-box {
+    padding: 1rem 0.75rem;
+    gap: 0.65rem;
+    border-radius: var(--radius-md);
+  }
+  .feature-icon-circle {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    font-size: 1.2rem;
+  }
+  .feature-info h4 {
+    font-size: 0.86rem;
+  }
+  .feature-info p {
+    font-size: 0.72rem;
+  }
+
+  /* Section Titles */
+  .section-title {
+    font-size: 1.75rem;
+  }
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+  .filter-pills {
+    gap: 0.45rem;
+    margin-bottom: 1.75rem;
+  }
+  .filter-btn {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Products Grid - Optimized 2-Column Mobile Layout */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2.75rem;
+  }
+  .product-card {
+    border-radius: var(--radius-md);
+  }
+  .product-thumb-box {
+    height: 190px;
+  }
+  .product-body {
+    padding: 0.75rem 0.65rem;
+  }
+  .product-category-tag {
+    font-size: 0.68rem;
+    margin-bottom: 0.2rem;
+  }
+  .product-title {
+    font-size: 0.88rem;
+    line-height: 1.35;
+    min-height: 2.4rem;
+  }
+  .product-desc {
+    display: none;
+  }
+  .product-price-current {
+    font-size: 1.15rem;
+  }
+  .product-price-old {
+    font-size: 0.82rem;
+  }
+  .product-actions-row {
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.65rem;
+  }
+  .product-actions-row .btn-primary,
+  .product-actions-row .btn-card-whatsapp {
+    width: 100%;
+    padding: 0.55rem 0.4rem;
+    font-size: 0.82rem;
+    justify-content: center;
+  }
+  .product-badge-tag {
+    top: 8px;
+    right: 8px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.68rem;
+  }
+
+  /* Delivery Banner Highlight */
+  .delivery-banner-card {
+    padding: 2rem 1.25rem !important;
+    text-align: center;
+    gap: 1.5rem !important;
+    justify-content: center !important;
+  }
+  .delivery-banner-card h3 {
+    font-size: 1.5rem !important;
+  }
+  .delivery-banner-card p {
+    font-size: 0.92rem !important;
+  }
+  .delivery-banner-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  .delivery-banner-actions .btn-whatsapp-hero {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Cart Drawer Fullscreen on Mobile */
+  .cart-drawer {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .cart-drawer-header {
+    padding: 1.25rem 1rem;
+  }
+  .cart-drawer-body {
+    padding: 1rem;
+  }
+  .cart-drawer-footer {
+    padding: 1.25rem 1rem;
+  }
+
+  /* Form & Modals */
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .modal-dialog {
+    width: 94% !important;
+    max-width: 94% !important;
+    margin: 1rem auto !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  .modal-body {
+    padding: 1.5rem 1rem !important;
+  }
+
+  /* Footer */
+  .footer-main {
+    padding: 3rem 0 1.5rem;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  .footer-col h4::after {
+    right: 50%;
+    transform: translateX(50%);
+  }
+  .footer-social-links {
+    justify-content: center;
+  }
+
+  /* Floating WhatsApp Button */
+  .whatsapp-floating-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    font-size: 1.8rem;
+    z-index: 9999 !important;
+  }
+
+  /* Delivery Calculator Grid on Mobile */
+  .calculator-result-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+}
+
+/* 3. Small Mobile Devices (<= 480px) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.7rem;
+  }
+  .hero-banner-box {
+    max-height: 280px;
+  }
+  .product-thumb-box {
+    height: 165px;
+  }
+  .product-body {
+    padding: 0.65rem 0.5rem;
+  }
+  .product-title {
+    font-size: 0.82rem;
+    min-height: 2.2rem;
+  }
+  .product-price-current {
+    font-size: 1.05rem;
+  }
+}
+
+/* 4. Very Narrow Screens (<= 340px) */
+@media (max-width: 340px) {
   .products-grid {
     grid-template-columns: 1fr;
   }
-  .form-row {
-    grid-template-columns: 1fr;
+  .product-thumb-box {
+    height: 240px;
   }
-  .footer-grid {
+  .features-grid {
     grid-template-columns: 1fr;
   }
 }
