@@ -211,26 +211,48 @@
     </div>
   </footer>
 
-  <script src="assets/js/wilayas.js?v=3.0"></script>
-  <script src="assets/js/config.js?v=3.0"></script>
-  <script src="assets/js/db.js?v=3.0"></script>
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/wilayas.js?v=3.1"></script>
+  <script src="assets/js/config.js?v=3.1"></script>
+  <script src="assets/js/db.js?v=3.1"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const wilayas = db.getWilayas();
+    let wilayasData = (typeof ALGERIA_WILAYAS !== 'undefined') ? ALGERIA_WILAYAS : [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const remotePrices = await db.getDeliveryPrices();
+        if (remotePrices && remotePrices.length > 0) {
+          wilayasData = remotePrices.map(r => {
+            const fallback = wilayasData.find(w => w.code === r.wilaya_code) || {};
+            return {
+              code: r.wilaya_code,
+              name: r.wilaya_name,
+              name_latin: fallback.name_latin || "",
+              home_price: r.home_price,
+              desk_price: r.desk_price,
+              duration: fallback.duration || "24-48 ساعة"
+            };
+          });
+        }
+      } catch (e) {
+        console.warn("Using local wilayas data:", e);
+      }
+
       const calcSelect = document.getElementById("wilayaCalculatorSelect");
       const tbody = document.getElementById("allWilayasTableBody");
 
       // Populate Select
       calcSelect.innerHTML = `<option value="">-- اختاري ولايتكِ هنا --</option>` + 
-        wilayas.map(w => `<option value="${w.code}">${w.code}. ${w.name} (${w.name_latin})</option>`).join("");
+        wilayasData.map(w => `<option value="${w.code}">${w.code}. ${w.name} (${w.name_latin})</option>`).join("");
 
       // Render Table
-      renderTable(wilayas);
+      renderTable(wilayasData);
 
       // Select change
       calcSelect.addEventListener("change", (e) => {
         const code = Number(e.target.value);
-        const item = wilayas.find(w => w.code === code);
+        const item = wilayasData.find(w => w.code === code);
         const resultBox = document.getElementById("calculatorResult");
         if (item) {
           document.getElementById("calcHomePrice").textContent = `${item.home_price.toLocaleString()} د.ج`;

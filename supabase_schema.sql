@@ -1,140 +1,128 @@
 -- ========================================================
--- Souelle Pajamas - Complete Supabase Database Schema
--- Brand: Souelle Pajamas (Luxury Women Pajamas & Perfumes)
+-- Souelle Pajamas (Pyjamas Femmes & Parfums)
+-- Database Schema & RLS Policies for Supabase
+-- Project URL: https://bypkpgzvwyrxukrdsyfw.supabase.co
 -- ========================================================
 
--- 1. Create Products Table
-CREATE TABLE IF NOT EXISTS public.products (
-  id TEXT PRIMARY KEY,
+-- 1. Categories Table
+CREATE TABLE IF NOT EXISTS public.categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  category TEXT NOT NULL,
-  category_label TEXT,
-  price NUMERIC NOT NULL,
-  old_price NUMERIC DEFAULT 0,
-  image_url TEXT,
-  description TEXT,
-  sizes JSONB DEFAULT '[]'::jsonb,
-  colors JSONB DEFAULT '[]'::jsonb,
-  in_stock BOOLEAN DEFAULT TRUE,
-  badge TEXT,
-  rating NUMERIC DEFAULT 5.0,
-  reviews_count NUMERIC DEFAULT 15,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Create Orders Table
-CREATE TABLE IF NOT EXISTS public.orders (
-  id TEXT PRIMARY KEY,
-  customer_name TEXT NOT NULL,
-  customer_phone TEXT NOT NULL,
-  wilaya_code INT NOT NULL,
+-- 2. Products Table
+CREATE TABLE IF NOT EXISTS public.products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+  price NUMERIC NOT NULL,
+  images TEXT[] DEFAULT '{}',
+  description TEXT,
+  sizes TEXT[] DEFAULT '{}',
+  colors TEXT[] DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Delivery Prices Table (58 Algerian Wilayas)
+CREATE TABLE IF NOT EXISTS public.delivery_prices (
+  wilaya_code INT PRIMARY KEY,
   wilaya_name TEXT NOT NULL,
-  commune TEXT NOT NULL,
-  address TEXT,
-  items JSONB NOT NULL,
-  subtotal NUMERIC NOT NULL,
-  delivery_fee NUMERIC NOT NULL,
+  home_price NUMERIC NOT NULL DEFAULT 600,
+  desk_price NUMERIC NOT NULL DEFAULT 400
+);
+
+-- 4. Orders Table
+CREATE TABLE IF NOT EXISTS public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  wilaya TEXT NOT NULL,
+  address TEXT NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
   total NUMERIC NOT NULL,
-  status TEXT DEFAULT 'قيد الانتظار',
+  status TEXT DEFAULT 'جديد',
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Create Store Settings Table
+-- 5. Store Settings Table
 CREATE TABLE IF NOT EXISTS public.store_settings (
-  id TEXT PRIMARY KEY,
-  config JSONB NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL
 );
 
 -- ========================================================
--- Row Level Security (RLS) Policies
+-- Row Level Security (RLS) Configuration
 -- ========================================================
 
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.delivery_prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 
--- Drop old policies if they exist
-DROP POLICY IF EXISTS "Allow public read on products" ON public.products;
-DROP POLICY IF EXISTS "Allow public all on products" ON public.products;
-DROP POLICY IF EXISTS "Allow public insert on orders" ON public.orders;
-DROP POLICY IF EXISTS "Allow public read on orders" ON public.orders;
-DROP POLICY IF EXISTS "Allow public all on orders" ON public.orders;
-DROP POLICY IF EXISTS "Allow public all on settings" ON public.store_settings;
+-- Drop existing policies if needed
+DROP POLICY IF EXISTS "Public can view categories" ON public.categories;
+DROP POLICY IF EXISTS "Authenticated can manage categories" ON public.categories;
+DROP POLICY IF EXISTS "Public can view products" ON public.products;
+DROP POLICY IF EXISTS "Authenticated can manage products" ON public.products;
+DROP POLICY IF EXISTS "Public can view delivery prices" ON public.delivery_prices;
+DROP POLICY IF EXISTS "Authenticated can manage delivery prices" ON public.delivery_prices;
+DROP POLICY IF EXISTS "Public can insert orders" ON public.orders;
+DROP POLICY IF EXISTS "Authenticated can view and manage orders" ON public.orders;
+DROP POLICY IF EXISTS "Public can view store settings" ON public.store_settings;
+DROP POLICY IF EXISTS "Authenticated can manage store settings" ON public.store_settings;
 
--- Public read for products & settings
-CREATE POLICY "Allow public read on products" ON public.products FOR SELECT USING (true);
-CREATE POLICY "Allow public all on products" ON public.products FOR ALL USING (true);
+-- Categories Policies
+CREATE POLICY "Public can view categories" ON public.categories 
+  FOR SELECT TO public USING (true);
+CREATE POLICY "Authenticated can manage categories" ON public.categories 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- Customers can submit orders, and admins can read/update them
-CREATE POLICY "Allow public insert on orders" ON public.orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public all on orders" ON public.orders FOR ALL USING (true);
+-- Products Policies
+CREATE POLICY "Public can view products" ON public.products 
+  FOR SELECT TO public USING (true);
+CREATE POLICY "Authenticated can manage products" ON public.products 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- Settings can be read and updated
-CREATE POLICY "Allow public all on settings" ON public.store_settings FOR ALL USING (true);
+-- Delivery Prices Policies
+CREATE POLICY "Public can view delivery prices" ON public.delivery_prices 
+  FOR SELECT TO public USING (true);
+CREATE POLICY "Authenticated can manage delivery prices" ON public.delivery_prices 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Orders Policies (Customers can create orders anonymously, Admin can read/update all)
+CREATE POLICY "Public can insert orders" ON public.orders 
+  FOR INSERT TO public WITH CHECK (true);
+CREATE POLICY "Authenticated can view and manage orders" ON public.orders 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Store Settings Policies
+CREATE POLICY "Public can view store settings" ON public.store_settings 
+  FOR SELECT TO public USING (true);
+CREATE POLICY "Authenticated can manage store settings" ON public.store_settings 
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- ========================================================
--- Seed Initial Products
+-- Storage Configuration (Bucket: products)
+-- Run this to create the bucket & allow public reading + admin uploads
 -- ========================================================
 
-INSERT INTO public.products (id, name, category, category_label, price, old_price, image_url, description, sizes, colors, in_stock, badge)
-VALUES
-  (
-    'prod-1',
-    'طقم بيجاما حرير ساتان ناعم - Rose Poudré',
-    'pajamas',
-    'بيجامات فاخرة',
-    4900,
-    6200,
-    'assets/images/pajama-silk-rose.jpg',
-    'طقم بيجاما حريرية فائقة النعومة من قطعتين (قميص بأزرار وياقة أنيقة + سروال فضفاض مريح). ملمس بارد خفيف على البشرة يمنحك نوماً هادئاً وراحة ملكية في منزلك.',
-    '["S", "M", "L", "XL", "XXL"]'::jsonb,
-    '["وردي بودري", "شمباني", "أسود ملكي"]'::jsonb,
-    true,
-    'الأكثر مبيعاً 🔥'
-  ),
-  (
-    'prod-2',
-    'طقم عرائسي ملكي بالدانتيل الفرنسي - Blanc Soie',
-    'pajamas',
-    'أطقم عرائس',
-    7800,
-    9500,
-    'assets/images/pajama-bridal-white.jpg',
-    'طقم عروس ساحر من قطعتين (روب حريري طويل بأكمام مطرزة بدانتيل فرنسي راقي + قميص نوم قصير بتصميم أنثوي ناعم). خيار مثالي لكل عروس تبحث عن الفخامة والتميز في جهازها.',
-    '["S", "M", "L", "XL"]'::jsonb,
-    '["أبيض عاجي", "وردي ناعم"]'::jsonb,
-    true,
-    'طقم عرائسي فاخر 👰'
-  ),
-  (
-    'prod-3',
-    'عطر Souelle Rose Nocturne - أو دو بارفان',
-    'perfumes',
-    'عطور فاخرة',
-    5200,
-    6500,
-    'assets/images/perfume-rose-nocturne.jpg',
-    'عطر نسائي زهري ساحر يجمع بين عبير الورود البلغارية الناعمة مع لمسات من الفواكه والمسك الأبيض الدافئ. ثباتية تدوم أكثر من 48 ساعة على الملابس مع فوحان أنثوي آسر.',
-    '["100ml"]'::jsonb,
-    '["Eau de Parfum"]'::jsonb,
-    true,
-    'عطر الموسم 🌸'
-  ),
-  (
-    'prod-4',
-    'عطر Souelle Vanille Royale - خشب الصندل والعنبر',
-    'perfumes',
-    'عطور فاخرة',
-    5800,
-    7200,
-    'assets/images/perfume-vanille-royale.jpg',
-    'عطر شرقي دافئ وراقي يمتزج فيه سحر الفانيلا المدغشقرية الفاخرة مع نفحات العنبر الملكي وخشب الصندل. عطر شتوي بامتياز يمنحك دفئاً وجاذبية لا تُقاوم.',
-    '["75ml"]'::jsonb,
-    '["Eau de Parfum"]'::jsonb,
-    true,
-    'فخامة ملكية 👑'
-  )
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('products', 'products', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Storage policies for 'products' bucket
+DROP POLICY IF EXISTS "Public can view products bucket images" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload images to products" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can update/delete images in products" ON storage.objects;
+
+CREATE POLICY "Public can view products bucket images" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'products');
+
+CREATE POLICY "Authenticated users can upload images to products" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'products');
+
+CREATE POLICY "Authenticated users can update/delete images in products" ON storage.objects
+  FOR ALL TO authenticated USING (bucket_id = 'products');
