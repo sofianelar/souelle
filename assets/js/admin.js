@@ -144,6 +144,11 @@ function setupAdminTabs() {
 
       const label = tab.querySelector("span:last-child")?.textContent || "لوحة التحكم";
       if (title) title.textContent = label;
+
+      // Close mobile sidebar if open
+      if (typeof closeAdminSidebar === "function") {
+        closeAdminSidebar();
+      }
     });
   });
 }
@@ -1266,3 +1271,45 @@ function removeHeroBannerImage() {
   showToast("تمت إزالة رابط صورة الهيرو", "info");
 }
 window.removeHeroBannerImage = removeHeroBannerImage;
+
+
+// ==================== MOBILE SIDEBAR TOGGLE ====================
+function toggleAdminSidebar() {
+  const sidebar = document.getElementById("adminSidebar");
+  const isOpen = sidebar?.classList.contains("open");
+  if (isOpen) {
+    closeAdminSidebar();
+  } else {
+    openAdminSidebar();
+  }
+}
+window.toggleAdminSidebar = toggleAdminSidebar;
+
+function openAdminSidebar() {
+  const sidebar = document.getElementById("adminSidebar");
+  const overlay = document.getElementById("adminSidebarOverlay");
+  const toggleBtn = document.getElementById("adminMenuToggle");
+  if (sidebar) sidebar.classList.add("open");
+  if (overlay) overlay.classList.add("active");
+  if (toggleBtn) toggleBtn.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+window.openAdminSidebar = openAdminSidebar;
+
+function closeAdminSidebar() {
+  const sidebar = document.getElementById("adminSidebar");
+  const overlay = document.getElementById("adminSidebarOverlay");
+  const toggleBtn = document.getElementById("adminMenuToggle");
+  if (sidebar) sidebar.classList.remove("open");
+  if (overlay) overlay.classList.remove("active");
+  if (toggleBtn) toggleBtn.classList.remove("active");
+  document.body.style.overflow = "";
+}
+window.closeAdminSidebar = closeAdminSidebar;
+
+// Close sidebar on ESC key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeAdminSidebar();
+  }
+});
