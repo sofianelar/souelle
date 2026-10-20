@@ -6,8 +6,8 @@
   <title>لوحة تحكم الإدارة | Souelle Pajamas</title>
   <link rel="icon" type="image/jpeg" href="assets/images/logo.jpg">
   
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=2.5">
+  <link rel="stylesheet" href="assets/css/admin.css?v=2.5">
 </head>
 <body class="admin-body">
 
@@ -19,7 +19,7 @@
         <h3 style="color: var(--secondary); font-size: 1.4rem; font-weight: 800; margin-bottom: 0.3rem;">لوحة إدارة Souelle Pajamas</h3>
         <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.75rem;">الرجاء تسجيل الدخول بجيميل وموتباس الخاص بكِ للمتابعة</p>
 
-        <form onsubmit="verifyAdminLogin(event)" id="adminLoginForm" autocomplete="off">
+        <form onsubmit="event.preventDefault(); verifyAdminLogin(event); return false;" id="adminLoginForm" autocomplete="off">
           <div class="form-group" style="margin-bottom: 1rem; text-align: right;">
             <label style="font-size:0.85rem; font-weight:700; color:var(--secondary); display:block; margin-bottom:0.4rem;">📧 الجيميل (Email):</label>
             <input type="email" id="adminEmailInput" class="form-control" placeholder="example@gmail.com" style="text-align: right; font-size: 0.98rem;" required autofocus>
@@ -31,7 +31,7 @@
           <div id="adminLoginError" style="display:none; background:#FFF0F0; border:1px solid #FCA5A5; border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; color:#B91C1C; font-size:0.88rem; font-weight:700;">
             ❌ الجيميل أو الموتباس غلط. أعاودي المحاولة.
           </div>
-          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; font-size:1rem;">
+          <button type="submit" onclick="verifyAdminLogin(event)" class="btn-primary" style="width: 100%; justify-content: center; font-size:1rem;">
             <span>تسجيل الدخول</span> 🔐
           </button>
         </form>
@@ -851,9 +851,9 @@
   <div id="printableInvoice" style="display:none;"></div>
 
   <!-- Scripts -->
-  <script src="assets/js/wilayas.js"></script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/db.js"></script>
-  <script src="assets/js/admin.js"></script>
+  <script src="assets/js/wilayas.js?v=2.5"></script>
+  <script src="assets/js/config.js?v=2.5"></script>
+  <script src="assets/js/db.js?v=2.5"></script>
+  <script src="assets/js/admin.js?v=2.5"></script>
 </body>
 </html>

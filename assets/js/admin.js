@@ -3,19 +3,31 @@
 // ========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Attach submit listener to adminLoginForm if present
+  const form = document.getElementById("adminLoginForm");
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      verifyAdminLogin(e);
+    });
+  }
   checkAdminAuth();
 });
 
 // Authentication
 function checkAdminAuth() {
-  const isAuth = sessionStorage.getItem("souelle_admin_logged_in");
+  const isAuth = sessionStorage.getItem("souelle_admin_logged_in") || localStorage.getItem("souelle_admin_logged_in");
   const authModal = document.getElementById("adminAuthModal");
 
   if (!isAuth) {
     if (authModal) authModal.classList.add("active");
   } else {
     if (authModal) authModal.classList.remove("active");
-    initAdminDashboard();
+    try {
+      initAdminDashboard();
+    } catch (err) {
+      console.error("Dashboard initialization error:", err);
+    }
   }
 }
 
@@ -24,14 +36,17 @@ const ADMIN_EMAIL    = "souadayaosmani@gmail.com";
 const ADMIN_PASSWORD = "souados2007";
 
 function verifyAdminLogin(e) {
-  if (e) e.preventDefault();
+  if (e) {
+    e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+  }
 
   const emailInput    = document.getElementById("adminEmailInput");
   const passwordInput = document.getElementById("adminPasswordInput");
   const errorBox      = document.getElementById("adminLoginError");
 
-  const email    = emailInput    ? emailInput.value.trim().toLowerCase()    : "";
-  const password = passwordInput ? passwordInput.value : "";
+  const email    = emailInput    ? emailInput.value.trim().toLowerCase() : "";
+  const password = passwordInput ? passwordInput.value.trim() : "";
 
   const emailOk    = (email    === ADMIN_EMAIL);
   const passwordOk = (password === ADMIN_PASSWORD);
@@ -40,10 +55,16 @@ function verifyAdminLogin(e) {
     // Success
     if (errorBox) errorBox.style.display = "none";
     sessionStorage.setItem("souelle_admin_logged_in", "true");
+    localStorage.setItem("souelle_admin_logged_in", "true");
     const authModal = document.getElementById("adminAuthModal");
     if (authModal) authModal.classList.remove("active");
-    initAdminDashboard();
+    try {
+      initAdminDashboard();
+    } catch (err) {
+      console.error("Dashboard initialization error:", err);
+    }
     showToast("مرحباً بكِ في لوحة تحكم Souelle Pajamas 🎀", "success");
+    return false;
   } else {
     // Shake the form and show error
     if (errorBox) {
@@ -59,15 +80,17 @@ function verifyAdminLogin(e) {
     // Clear password field only on wrong attempt
     if (passwordInput) passwordInput.value = "";
     if (passwordInput) passwordInput.focus();
+    return false;
   }
 }
 
 // Keep old name as alias so any stray calls don't break
-function verifyAdminPin(e) { verifyAdminLogin(e); }
+function verifyAdminPin(e) { return verifyAdminLogin(e); }
 
 function adminLogout() {
   if (confirm("هل تريدين الخروج من لوحة الإدارة والعودة إلى المتجر؟")) {
     sessionStorage.removeItem("souelle_admin_logged_in");
+    localStorage.removeItem("souelle_admin_logged_in");
     window.location.href = "index.html";
   }
 }
