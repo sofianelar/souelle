@@ -267,9 +267,9 @@
       // Filter Table
       document.getElementById("tableFilterInput").addEventListener("input", (e) => {
         const q = e.target.value.toLowerCase().trim();
-        const filtered = wilayas.filter(w => 
+        const filtered = wilayasData.filter(w => 
           w.name.includes(q) || 
-          w.name_latin.toLowerCase().includes(q) || 
+          (w.name_latin && w.name_latin.toLowerCase().includes(q)) || 
           String(w.code).includes(q)
         );
         renderTable(filtered);

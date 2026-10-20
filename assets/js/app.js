@@ -69,14 +69,57 @@ function applyStoreBranding() {
     link.href = s.instagramUrl || `https://instagram.com/${s.instagramHandle || 'souelle_pajamas'}`;
   });
 
-  // Hero Section
+  // Hero Section Customization
   if (s.hero) {
     const heroTitle = document.getElementById("heroTitle");
     if (heroTitle && s.hero.title) heroTitle.innerHTML = s.hero.title;
+    
     const heroSubtitle = document.getElementById("heroSubtitle");
     if (heroSubtitle && s.hero.subtitle) heroSubtitle.textContent = s.hero.subtitle;
+    
     const heroBadge = document.getElementById("heroBadge");
     if (heroBadge && s.hero.badge) heroBadge.textContent = s.hero.badge;
+
+    // Banner Image
+    const heroBannerImg = document.getElementById("heroBannerImg");
+    if (heroBannerImg && s.hero.bannerImage) {
+      heroBannerImg.src = s.hero.bannerImage;
+    }
+
+    // CTA Primary Button
+    const heroCtaPrimary = document.getElementById("heroCtaPrimary");
+    if (heroCtaPrimary) {
+      if (s.hero.ctaPrimaryText) {
+        const span = heroCtaPrimary.querySelector("span");
+        if (span) span.textContent = s.hero.ctaPrimaryText;
+      }
+      if (s.hero.ctaPrimaryLink) heroCtaPrimary.setAttribute("href", s.hero.ctaPrimaryLink);
+    }
+
+    // CTA Secondary Button
+    const heroCtaSecondary = document.getElementById("heroCtaSecondary");
+    if (heroCtaSecondary) {
+      if (s.hero.ctaSecondaryText) {
+        const span = heroCtaSecondary.querySelector("span");
+        if (span) span.textContent = s.hero.ctaSecondaryText;
+      }
+      if (s.hero.ctaSecondaryLink) heroCtaSecondary.setAttribute("href", s.hero.ctaSecondaryLink);
+    }
+
+    // CTA WhatsApp Button
+    const heroCtaWhatsapp = document.getElementById("heroCtaWhatsapp");
+    if (heroCtaWhatsapp && s.hero.ctaWhatsappText) {
+      const span = heroCtaWhatsapp.querySelector("span");
+      if (span) span.textContent = s.hero.ctaWhatsappText;
+    }
+
+    // Floating Hero Tag Card
+    const floatingTagIcon = document.getElementById("heroFloatingTagIcon");
+    if (floatingTagIcon && s.hero.floatingTagIcon) floatingTagIcon.textContent = s.hero.floatingTagIcon;
+    const floatingTagTitle = document.getElementById("heroFloatingTagTitle");
+    if (floatingTagTitle && s.hero.floatingTagTitle) floatingTagTitle.textContent = s.hero.floatingTagTitle;
+    const floatingTagSubtitle = document.getElementById("heroFloatingTagSubtitle");
+    if (floatingTagSubtitle && s.hero.floatingTagSubtitle) floatingTagSubtitle.textContent = s.hero.floatingTagSubtitle;
   }
 
   // Section Headings
@@ -93,6 +136,49 @@ function applyStoreBranding() {
   renderFeaturesStrip(s);
   renderCustomerReviews(s);
 }
+
+// ==================== WILAYAS & DELIVERY (58 WILAYAS) ====================
+async function loadStoreWilayas() {
+  let baseWilayas = (typeof ALGERIA_WILAYAS !== "undefined") ? ALGERIA_WILAYAS : [];
+
+  try {
+    const remotePrices = await db.getDeliveryPrices();
+    if (remotePrices && remotePrices.length > 0) {
+      storeDeliveryPrices = baseWilayas.map(w => {
+        const match = remotePrices.find(r => Number(r.wilaya_code) === Number(w.code));
+        return {
+          code: w.code,
+          name: w.name,
+          name_latin: w.name_latin || "",
+          home_price: match ? Number(match.home_price) : w.home_price,
+          desk_price: match ? Number(match.desk_price) : w.desk_price,
+          duration: w.duration || "24-48 ساعة"
+        };
+      });
+    } else {
+      storeDeliveryPrices = baseWilayas;
+    }
+  } catch (err) {
+    console.warn("Could not fetch remote delivery prices, using standard wilayas:", err);
+    storeDeliveryPrices = baseWilayas;
+  }
+
+  // Populate all .wilaya-select dropdowns
+  const optionsHtml = `<option value="">-- اختاري ولايتكِ (58 ولاية) --</option>` +
+    storeDeliveryPrices.map(w => `
+      <option value="${w.code}" data-code="${w.code}" data-name="${w.name}" data-home="${w.home_price}" data-desk="${w.desk_price}">
+        ${w.code}. ${w.name} ${w.name_latin ? `(${w.name_latin})` : ''}
+      </option>
+    `).join("");
+
+  document.querySelectorAll(".wilaya-select").forEach(sel => {
+    const prevVal = sel.value;
+    sel.innerHTML = optionsHtml;
+    if (prevVal) sel.value = prevVal;
+  });
+}
+window.loadStoreWilayas = loadStoreWilayas;
+
 
 // Render dynamic features strip
 function renderFeaturesStrip(s) {

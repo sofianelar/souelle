@@ -452,6 +452,29 @@
               <label class="form-label">الوصف الفرعي للهيرو:</label>
               <textarea id="settingsHeroSubtitle" class="form-control" rows="3" required></textarea>
             </div>
+
+            <div class="form-group" style="margin-top: 1.25rem;">
+              <label class="form-label">صورة خلفية الهيرو (Hero Banner Image):</label>
+              <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+                <img src="assets/images/hero-banner.jpg" id="heroBannerPreviewImg" style="width:140px; height:80px; object-fit:cover; border-radius: 8px; border:1px solid #ddd;">
+                <div>
+                  <input type="file" id="heroBannerFileInput" accept="image/*" onchange="previewSelectedHeroBanner(this)" style="display:none;">
+                  <button type="button" class="btn-secondary" style="font-size:0.88rem;" onclick="document.getElementById('heroBannerFileInput').click()">
+                    <span>اختيار صورة الهيرو ورفعها لـ Supabase</span> 📤
+                  </button>
+                  <span id="heroBannerUploadStatus" style="display:block; font-size:0.8rem; color:#64748B; margin-top:0.3rem;"></span>
+                </div>
+              </div>
+              <div>
+                <label style="font-size:0.82rem; color:#64748B; display:block; margin-bottom:0.3rem;">أو إدخال رابط صورة الهيرو مباشرة (URL):</label>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                  <input type="url" id="settingsHeroBannerImage" class="form-control" placeholder="https://... رابط صورة الهيرو" oninput="updateHeroBannerPreview(this.value)">
+                  <button type="button" class="btn-secondary" style="padding:0.5rem 0.8rem; font-size:0.8rem; white-space:nowrap; color:#DC2626;" onclick="removeHeroBannerImage()">
+                    حذف الصورة 🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

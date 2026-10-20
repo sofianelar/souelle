@@ -974,6 +974,12 @@ async function loadStoreSettingsIntoForm() {
     if (heroTitle) heroTitle.value = s.hero?.title || DEFAULT_CONFIG.hero.title;
     const heroSub = document.getElementById("settingsHeroSubtitle");
     if (heroSub) heroSub.value = s.hero?.subtitle || DEFAULT_CONFIG.hero.subtitle;
+    const heroBannerInput = document.getElementById("settingsHeroBannerImage");
+    const bannerVal = s.hero?.bannerImage || DEFAULT_CONFIG.hero?.bannerImage || "";
+    if (heroBannerInput) {
+      heroBannerInput.value = bannerVal;
+      updateHeroBannerPreview(bannerVal);
+    }
 
     // Theme
     if (s.theme) {
@@ -1043,7 +1049,8 @@ async function saveBrandingAndThemeSettings(e) {
       ...current.hero,
       badge: document.getElementById("settingsHeroBadge")?.value || current.hero.badge,
       title: document.getElementById("settingsHeroTitle")?.value || current.hero.title,
-      subtitle: document.getElementById("settingsHeroSubtitle")?.value || current.hero.subtitle
+      subtitle: document.getElementById("settingsHeroSubtitle")?.value || current.hero.subtitle,
+      bannerImage: document.getElementById("settingsHeroBannerImage")?.value || current.hero?.bannerImage || ""
     },
     theme: {
       primary,
@@ -1201,3 +1208,61 @@ CREATE POLICY "Allow authenticated all on settings" ON public.store_settings FOR
   });
 }
 window.copySqlSchema = copySqlSchema;
+
+
+// ==================== HERO BANNER IMAGE HANDLERS ====================
+async function previewSelectedHeroBanner(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const preview = document.getElementById("heroBannerPreviewImg");
+  const urlInput = document.getElementById("settingsHeroBannerImage");
+  const statusEl = document.getElementById("heroBannerUploadStatus");
+
+  // Show local preview immediately
+  const reader = new FileReader();
+  reader.onload = e => { if (preview) preview.src = e.target.result; };
+  reader.readAsDataURL(file);
+
+  if (statusEl) {
+    statusEl.textContent = "جاري رفع صورة الهيرو إلى Supabase Storage (bucket: products)... ⏳";
+    statusEl.style.color = "#2563EB";
+  }
+
+  try {
+    const uploadedUrl = await db.uploadProductImage(file);
+    if (urlInput) urlInput.value = uploadedUrl;
+    if (preview) preview.src = uploadedUrl;
+    if (statusEl) {
+      statusEl.textContent = "✅ تم رفع صورة الهيرو بنجاح!";
+      statusEl.style.color = "#16A34A";
+    }
+    showToast("تم رفع صورة الهيرو إلى Supabase بنجاح 🖼️✨", "success");
+  } catch (err) {
+    console.error("Storage upload error for hero:", err);
+    if (statusEl) {
+      statusEl.textContent = `⚠️ تعذر الرفع: ${err.message}. يمكنكِ وضع رابط مباشر.`;
+      statusEl.style.color = "#DC2626";
+    }
+  }
+}
+window.previewSelectedHeroBanner = previewSelectedHeroBanner;
+
+function updateHeroBannerPreview(val) {
+  const preview = document.getElementById("heroBannerPreviewImg");
+  if (preview) preview.src = val || "assets/images/hero-banner.jpg";
+}
+window.updateHeroBannerPreview = updateHeroBannerPreview;
+
+function removeHeroBannerImage() {
+  const urlInput = document.getElementById("settingsHeroBannerImage");
+  const fileInput = document.getElementById("heroBannerFileInput");
+  const preview = document.getElementById("heroBannerPreviewImg");
+  const statusEl = document.getElementById("heroBannerUploadStatus");
+  if (urlInput) urlInput.value = "";
+  if (fileInput) fileInput.value = "";
+  if (preview) preview.src = "assets/images/hero-banner.jpg";
+  if (statusEl) statusEl.textContent = "";
+  showToast("تمت إزالة رابط صورة الهيرو", "info");
+}
+window.removeHeroBannerImage = removeHeroBannerImage;
