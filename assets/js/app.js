@@ -269,8 +269,7 @@ function renderNavLinks() {
   });
 
   html += `
-    <li><a href="delivery.html" class="nav-link">أسعار التوصيل (58 ولاية)</a></li>
-    <li><a href="https://wa.me/${whatsappNum}" target="_blank" class="nav-link" style="color: #25D366; font-weight: 700;">طلب عبر واتساب 💬</a></li>
+        <li><a href="https://wa.me/${whatsappNum}" target="_blank" class="nav-link" style="color: #25D366; font-weight: 700;">طلب عبر واتساب 💬</a></li>
   `;
 
   if (mainNav) mainNav.innerHTML = html;
